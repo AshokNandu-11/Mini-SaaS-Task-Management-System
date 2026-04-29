@@ -16,24 +16,20 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 app.use(helmet());
 
 // ── CORS ─────────────────────────────────────────────────
-const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
-  .split(',')
-  .map(o => o.trim());
+const allowedOrigins = process.env.CORS_ORIGIN 
+  ? process.env.CORS_ORIGIN.split(',').map(o => o.trim()) 
+  : ['http://localhost:5173'];
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (e.g., Postman, curl) in development
-    if (!origin && NODE_ENV === 'development') return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
+    // Allow requests with no origin (e.g., Postman, curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+      return callback(null, true);
+    }
     callback(new Error(`CORS: Origin '${origin}' not allowed.`));
   },
   credentials: true,
-}));
-
-// ── CORS for Render ──────────────────────────────────────
-app.use(cors({
-  origin: "*",
-  credentials: true
 }));
 
 // ── Body Parsing ─────────────────────────────────────────
@@ -90,6 +86,6 @@ app.use((err, req, res, next) => {
 // ── Start Server ─────────────────────────────────────────
 syncDB().then(() => {
   app.listen(PORT, () => {
-    console.log(`🚀 Backend running at http://localhost:${PORT} [${NODE_ENV}]`);
+    console.log(`🚀 Backend running at port ${PORT} [${NODE_ENV}]`);
   });
 });
