@@ -30,6 +30,12 @@ app.use(cors({
   credentials: true,
 }));
 
+// ── CORS for Render ──────────────────────────────────────
+app.use(cors({
+  origin: "*",
+  credentials: true
+}));
+
 // ── Body Parsing ─────────────────────────────────────────
 app.use(express.json({ limit: '10kb' })); // Prevent huge payload attacks
 
